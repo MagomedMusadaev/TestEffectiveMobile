@@ -1,0 +1,305 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "TestEffectiveMobile API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8085",
+    "basePath": "/",
+    "paths": {
+        "/songs": {
+            "get": {
+                "description": "Получает список песен с возможностью фильтрации по группе и названию, а также с пагинацией.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Получение списка песен",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Название группы",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Название песни",
+                        "name": "song_title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Лимит записей (по умолчанию 11)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Сдвиг записей",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список песен",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Song"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новую песню, выполняет вызов внешнего API для обогащения данных и сохраняет в базу.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Добавление новой песни",
+                "parameters": [
+                    {
+                        "description": "Данные новой песни",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.Song"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Созданная песня",
+                        "schema": {
+                            "$ref": "#/definitions/entities.Song"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{id}": {
+            "put": {
+                "description": "Обновляет данные песни по идентификатору. Передаётся JSON объект песни.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Обновление данных песни",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Обновленные данные песни",
+                        "name": "song",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entities.Song"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID или Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет песню по идентификатору.",
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Удаление песни",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/songs/{id}/text": {
+            "get": {
+                "description": "Возвращает текст песни, разделенный на куплеты с пагинацией. Параметры versePage и versePageSize управляют выводом куплетов.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "songs"
+                ],
+                "summary": "Получение текста песни с пагинацией куплетов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID песни",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы куплетов (по умолчанию 1)",
+                        "name": "versePage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество куплетов на странице (по умолчанию 5)",
+                        "name": "versePageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Текст песни",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный ID",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Песня не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.ErrorResponse": {
+            "description": "Структура для представления ошибки, которая включает код ошибки и сообщение.",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Код ошибки\n@example 500",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "Сообщение ошибки\n@example \"Internal Server Error\"",
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Song": {
+            "description": "Структура для представления песни, которая включает 6 полей.",
+            "type": "object",
+            "properties": {
+                "group": {
+                    "description": "Group название группы или исполнителя.\n\nrequired: true\n\nexample: \"The Beatles\"",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID уникальный идентификатор песни.\n\nrequired: true\n\nexample: 1",
+                    "type": "integer"
+                },
+                "link": {
+                    "description": "Link ссылка на дополнительную информацию о песне.\n\nexample: \"https://example.com/song-info\"",
+                    "type": "string"
+                },
+                "releaseDate": {
+                    "description": "ReleaseDate дата выпуска песни в формате YYYY-MM-DD.\n\nexample: \"2023-01-01\"",
+                    "type": "string"
+                },
+                "song": {
+                    "description": "Title название песни.\n\nrequired: true\n\nexample: \"Hey Jude\"",
+                    "type": "string"
+                },
+                "text": {
+                    "description": "Text текст песни.\n\nexample: \"Hey, Jude, don't make it bad...\"",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

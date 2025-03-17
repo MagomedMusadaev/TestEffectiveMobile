@@ -1,0 +1,237 @@
+basePath: /
+definitions:
+  entities.ErrorResponse:
+    description: Структура для представления ошибки, которая включает код ошибки и
+      сообщение.
+    properties:
+      code:
+        description: |-
+          Код ошибки
+          @example 500
+        type: integer
+      message:
+        description: |-
+          Сообщение ошибки
+          @example "Internal Server Error"
+        type: string
+    type: object
+  entities.Song:
+    description: Структура для представления песни, которая включает 6 полей.
+    properties:
+      group:
+        description: |-
+          Group название группы или исполнителя.
+
+          required: true
+
+          example: "The Beatles"
+        type: string
+      id:
+        description: |-
+          ID уникальный идентификатор песни.
+
+          required: true
+
+          example: 1
+        type: integer
+      link:
+        description: |-
+          Link ссылка на дополнительную информацию о песне.
+
+          example: "https://example.com/song-info"
+        type: string
+      releaseDate:
+        description: |-
+          ReleaseDate дата выпуска песни в формате YYYY-MM-DD.
+
+          example: "2023-01-01"
+        type: string
+      song:
+        description: |-
+          Title название песни.
+
+          required: true
+
+          example: "Hey Jude"
+        type: string
+      text:
+        description: |-
+          Text текст песни.
+
+          example: "Hey, Jude, don't make it bad..."
+        type: string
+    type: object
+host: localhost:8085
+info:
+  contact: {}
+  title: TestEffectiveMobile API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      description: Получает список песен с возможностью фильтрации по группе и названию,
+        а также с пагинацией.
+      parameters:
+      - description: Название группы
+        in: query
+        name: group
+        type: string
+      - description: Название песни
+        in: query
+        name: song_title
+        type: string
+      - description: Лимит записей (по умолчанию 11)
+        in: query
+        name: limit
+        type: integer
+      - description: Сдвиг записей
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список песен
+          schema:
+            items:
+              $ref: '#/definitions/entities.Song'
+            type: array
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Получение списка песен
+      tags:
+      - songs
+    post:
+      consumes:
+      - application/json
+      description: Создает новую песню, выполняет вызов внешнего API для обогащения
+        данных и сохраняет в базу.
+      parameters:
+      - description: Данные новой песни
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная песня
+          schema:
+            $ref: '#/definitions/entities.Song'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Добавление новой песни
+      tags:
+      - songs
+  /songs/{id}:
+    delete:
+      description: Удаляет песню по идентификатору.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Неверный ID
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Удаление песни
+      tags:
+      - songs
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные песни по идентификатору. Передаётся JSON объект
+        песни.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновленные данные песни
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Неверный ID или Bad Request
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Обновление данных песни
+      tags:
+      - songs
+  /songs/{id}/text:
+    get:
+      description: Возвращает текст песни, разделенный на куплеты с пагинацией. Параметры
+        versePage и versePageSize управляют выводом куплетов.
+      parameters:
+      - description: ID песни
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Номер страницы куплетов (по умолчанию 1)
+        in: query
+        name: versePage
+        type: integer
+      - description: Количество куплетов на странице (по умолчанию 5)
+        in: query
+        name: versePageSize
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Текст песни
+          schema:
+            type: string
+        "400":
+          description: Неверный ID
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "404":
+          description: Песня не найдена
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/entities.ErrorResponse'
+      summary: Получение текста песни с пагинацией куплетов
+      tags:
+      - songs
+swagger: "2.0"
