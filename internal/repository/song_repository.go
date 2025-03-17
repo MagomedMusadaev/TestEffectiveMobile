@@ -19,10 +19,6 @@ type songRepository struct {
 	db *sql.DB
 }
 
-func NewSongRepositoryyy() SongRepository {
-	return &songRepository{}
-}
-
 func NewSongRepository(db *sql.DB) SongRepository {
 	return &songRepository{
 		db: db,

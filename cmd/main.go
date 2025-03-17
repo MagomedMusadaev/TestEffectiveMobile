@@ -48,7 +48,7 @@ func main() {
 	}
 
 	// Инициализация всех слоёв
-	songRepo := repository.NewSongRepositoryyy()
+	songRepo := repository.NewSongRepository(db)
 	songUC := usecase.NewSongUseCase(songRepo, config.GetExternalAPIURL())
 	songHandler := handler.NewSongHandler(songUC)
 
